@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hasil Ujian Siswa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a25;
+      --border: #2a2a3a;
+      --accent: #6ee7b7;
+      --accent2: #a78bfa;
+      --accent3: #f59e0b;
+      --text: #e8e8f0;
+      --text-muted: #6b6b8a;
+      --danger: #f87171;
+      --success: #6ee7b7;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(110,231,183,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110,231,183,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glowing orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      animation: orb-drift 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes orb-drift {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(100px, 80px); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: slide-down 0.6s ease both;
+    }
+
+    @keyframes slide-down {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-badge {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(110,231,183,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      background: rgba(110,231,183,0.05);
+    }
+
+    .header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(32px, 6vw, 52px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .header h1 .line1 { display: block; color: var(--text); }
+    .header h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      margin-top: 12px;
+      color: var(--text-muted);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    /* Lookup Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      animation: fade-up 0.6s ease 0.15s both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .input-wrap {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.08em;
+    }
+
+    input[type="text"]::placeholder { color: var(--text-muted); font-size: 14px; letter-spacing: 0.04em; }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(110,231,183,0.12);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0a0a0f;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      background: #86efca;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(110,231,183,0.25);
+    }
+
+    .btn:active { transform: translateY(0); }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Status messages */
+    .status {
+      margin-top: 16px;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    .status.error {
+      display: flex;
+      color: var(--danger);
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.2);
+    }
+
+    .status.loading {
+      display: flex;
+      color: var(--accent2);
+      background: rgba(167,139,250,0.08);
+      border: 1px solid rgba(167,139,250,0.2);
+    }
+
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(167,139,250,0.3);
+      border-top-color: var(--accent2);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Result Panel */
+    #result {
+      margin-top: 32px;
+      display: none;
+      animation: fade-up 0.5s ease both;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+
+    .student-info {}
+
+    .student-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .student-meta {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .student-meta span {
+      display: inline-block;
+      margin-right: 16px;
+    }
+
+    .student-meta span::before {
+      content: '▸ ';
+      color: var(--accent);
+    }
+
+    .avg-badge {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .avg-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .avg-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .avg-value.high   { color: var(--accent); }
+    .avg-value.mid    { color: var(--accent3); }
+    .avg-value.low    { color: var(--danger); }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    /* Mapel grid */
+    .mapel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .mapel-grid { grid-template-columns: 1fr; }
+      .input-group { flex-direction: column; }
+      .btn { width: 100%; }
+    }
+
+    .mapel-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: item-pop 0.4s ease both;
+    }
+
+    .mapel-item:hover {
+      border-color: rgba(110,231,183,0.3);
+      transform: translateX(2px);
+    }
+
+    @keyframes item-pop {
+      from { opacity: 0; transform: scale(0.96); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .mapel-item:nth-child(1)  { animation-delay: 0.05s; }
+    .mapel-item:nth-child(2)  { animation-delay: 0.10s; }
+    .mapel-item:nth-child(3)  { animation-delay: 0.15s; }
+    .mapel-item:nth-child(4)  { animation-delay: 0.20s; }
+    .mapel-item:nth-child(5)  { animation-delay: 0.25s; }
+    .mapel-item:nth-child(6)  { animation-delay: 0.30s; }
+    .mapel-item:nth-child(7)  { animation-delay: 0.35s; }
+    .mapel-item:nth-child(8)  { animation-delay: 0.40s; }
+
+    .mapel-left {}
+    .mapel-icon {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+    .mapel-name {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .mapel-score {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .mapel-score.high { color: var(--accent); }
+    .mapel-score.mid  { color: var(--accent3); }
+    .mapel-score.low  { color: var(--danger); }
+    .mapel-score.none { color: var(--text-muted); font-size: 18px; }
+
+    .score-bar-wrap {
+      margin-top: 8px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .score-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.8s ease;
+    }
+
+    .score-bar.high { background: var(--accent); }
+    .score-bar.mid  { background: var(--accent3); }
+    .score-bar.low  { background: var(--danger); }
+
+    /* Footer note */
+    .footer-note {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      animation: fade-up 0.6s ease 0.3s both;
+    }
+
+    /* GAS URL config notice */
+    .config-notice {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--accent3);
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+      line-height: 1.6;
+    }
+
+    .config-notice code {
+      background: rgba(245,158,11,0.15);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="header">
+      <div class="header-badge">Portal Akademik</div>
+      <h1>
+        <span class="line1">Cek Hasil</span>
+        <span class="line2">Ujian Siswa</span>
+      </h1>
+      <p>Masukkan nomor peserta untuk melihat nilai mata pelajaran</p>
+    </header>
+
+    <div class="card">
+
+        <div class="input-group">
+        <div class="input-wrap">
+          <label for="noPeserta">Nomor Peserta</label>
+          <input
+            type="text"
+            id="noPeserta"
+            placeholder="Contoh: 2024001"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          />
+        </div>
+        <button class="btn" id="btnCari" onclick="cariSiswa()">Cari →</button>
+      </div>
+
+      <div class="status loading" id="statusLoading">
+        <div class="spinner"></div>
+        <span>Mengambil data...</span>
+      </div>
+
+      <div class="status error" id="statusError">
+        <span>⚠</span>
+        <span id="errorMsg">Nomor peserta tidak ditemukan.</span>
+      </div>
+
+      <!-- Result -->
+      <div id="result">
+        <div class="divider"></div>
+
+        <div class="result-header">
+          <div class="student-info">
+            <div class="student-name" id="namaStudent">—</div>
+            <div class="student-meta">
+              <span id="noPesertaDisplay">—</span>
+              <span id="kelasDisplay">—</span>
+            </div>
+          </div>
+          <div class="avg-badge">
+            <div class="avg-label">Rata-rata</div>
+            <div class="avg-value" id="rataRata">—</div>
+          </div>
+        </div>
+
+        <div class="mapel-grid" id="mapelGrid">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-note">
+      Data bersumber dari Google Sheets · Tekan Enter untuk mencari
+    </div>
+
+  </div>
+
+  <script>
+    // ============================================================
+    // ⚠️ GANTI URL INI dengan URL Web App Google Apps Script kamu
+    // ============================================================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxLt9l9wJ5RZDMcnR2bcHJsYNbZubQSkZuikUjok0HwMiRar3jkQZohmSH54qSI_o1w/exec";
+    // ============================================================
+
+    const MAPEL_CONFIG = [
+      { key: "pabp",        label: "PA & BP",      icon: "🕌" },
+      { key: "indonesia",   label: "Bhs. Indonesia",icon: "📖" },
+      { key: "pkn",         label: "PKn",           icon: "🏛️" },
+      { key: "matematika",  label: "Matematika",    icon: "📐" },
+      { key: "sunda",       label: "Bhs. Sunda",    icon: "🌿" },
+      { key: "informatika", label: "Informatika",   icon: "💻" },
+      { key: "inggris",     label: "Bhs. Inggris",  icon: "🌐" },
+      { key: "ips",         label: "IPS",           icon: "🗺️" },
+    ];
+
+    let cachedData = null;
+
+    // Enter key support
+    document.getElementById("noPeserta").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") cariSiswa();
+    });
+
+    function scoreClass(val) {
+      if (val === null || val === undefined || val === "") return "none";
+      const n = parseFloat(val);
+      if (isNaN(n)) return "none";
+      if (n >= 80) return "high";
+      if (n >= 65) return "mid";
+      return "low";
+    }
+
+    function showError(msg) {
+      document.getElementById("statusLoading").style.display = "none";
+      document.getElementById("statusError").style.display = "flex";
+      document.getElementById("errorMsg").textContent = msg;
+      document.getElementById("result").style.display = "none";
+    }
+
+    function hideAll() {
+      document.getElementById("statusLoading").style.display = "none";
+      document.getElementById("statusError").style.display = "none";
+      document.getElementById("result").style.display = "none";
+    }
+
+    async function fetchData() {
+      if (cachedData) return cachedData;
+
+      const url = `${GAS_URL}?action=getData`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      cachedData = json;
+      return cachedData;
+    }
+
+    async function cariSiswa() {
+      const input = document.getElementById("noPeserta").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("btnCari");
+      btn.disabled = true;
+      hideAll();
+      document.getElementById("statusLoading").style.display = "flex";
+
+      try {
+        const { headers, data } = await fetchData();
+
+        // Normalisasi header → lowercase, trim
+        const hdrs = headers.map(h => h.toString().toLowerCase().trim());
+
+        // Cari kolom no peserta (kemungkinan "no peserta", "no_peserta", "nopeserta", "nomor", dll)
+        const noIdx = hdrs.findIndex(h =>
+          h.includes("peserta") || h.includes("nomor") || h === "no" || h === "nisn"
+        );
+        const namaIdx = hdrs.findIndex(h => h.includes("nama"));
+        const kelasIdx = hdrs.findIndex(h => h === "kelas");
+
+        if (noIdx < 0) throw new Error("Kolom nomor peserta tidak ditemukan di sheet.");
+
+        // Cari baris yang cocok
+        const row = data.find(r => {
+          const val = r[noIdx] !== undefined ? r[noIdx].toString().trim() : "";
+          return val === input || val.toLowerCase() === input.toLowerCase();
+        });
+
+        if (!row) {
+          showError(`Nomor peserta "${input}" tidak ditemukan.`);
+          return;
+        }
+
+        // Tampilkan info siswa
+        document.getElementById("namaStudent").textContent =
+          namaIdx >= 0 ? (row[namaIdx] || "—") : "—";
+        document.getElementById("noPesertaDisplay").textContent = `No: ${row[noIdx]}`;
+        document.getElementById("kelasDisplay").textContent =
+          kelasIdx >= 0 ? `Kelas ${row[kelasIdx]}` : "";
+
+        // Ambil nilai per mapel
+        let total = 0, count = 0;
+        const grid = document.getElementById("mapelGrid");
+        grid.innerHTML = "";
+
+        // Re-animate
+        MAPEL_CONFIG.forEach((mapel, i) => {
+          const colIdx = hdrs.findIndex(h => h === mapel.key);
+          let rawVal = colIdx >= 0 ? row[colIdx] : null;
+          let numVal = parseFloat(rawVal);
+          let display = (rawVal !== null && rawVal !== "" && !isNaN(numVal))
+            ? numVal.toFixed(0)
+            : "—";
+
+          const cls = isNaN(numVal) ? "none" : scoreClass(numVal);
+          const pct = isNaN(numVal) ? 0 : Math.min(100, (numVal / 100) * 100);
+
+          if (!isNaN(numVal)) { total += numVal; count++; }
+
+          const el = document.createElement("div");
+          el.className = "mapel-item";
+          el.style.animationDelay = `${i * 0.05}s`;
+          el.innerHTML = `
+            <div class="mapel-left">
+              <div class="mapel-icon">${mapel.icon}</div>
+              <div class="mapel-name">${mapel.label}</div>
+              <div class="score-bar-wrap">
+                <div class="score-bar ${cls}" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <div class="mapel-score ${cls}">${display}</div>
+          `;
+          grid.appendChild(el);
+        });
+
+        // Rata-rata
+        const avg = count > 0 ? (total / count).toFixed(1) : null;
+        const avgEl = document.getElementById("rataRata");
+        if (avg) {
+          avgEl.textContent = avg;
+          avgEl.className = "avg-value " + scoreClass(parseFloat(avg));
+        } else {
+          avgEl.textContent = "—";
+          avgEl.className = "avg-value none";
+        }
+
+        document.getElementById("statusLoading").style.display = "none";
+        document.getElementById("result").style.display = "block";
+
+      } catch (err) {
+        showError("Gagal mengambil data: " + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
